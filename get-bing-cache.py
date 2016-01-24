@@ -4,8 +4,9 @@ import json
 import time
 
 fname = "cache.json"
-query = "site%3A4chanlog.net"	# what to search for
-total = 705						# the total amount of listings on Bing 
+site = "rockenflac.blogspot.com"			# site to search for
+query = "site%3A" + site		# what to search for
+total = 419						# the total amount of listings for this search on Bing 
 
 browser = RoboBrowser()
 
@@ -21,9 +22,11 @@ for i in range(1, total, 14):
 	# desc - Quick description of the site.
 
 	# grab all search attribute strings
-	listing = {}
 	capt_list = browser.select('.b_caption')
 	for capt in capt_list:
+		# start a new listing
+		listing = {}
+		
 		# display original url
 		listing['orig_url'] = re.sub('<[^>]*>', '', str(capt.select('cite')[0]))
 		
@@ -48,4 +51,4 @@ for i in range(1, total, 14):
 	time.sleep(1)
 
 with open(fname, 'w') as outfile:
-    json.dump(listings, outfile)
+    json.dump(listings, outfile, sort_keys=True, indent=4, separators=(',', ': '))
