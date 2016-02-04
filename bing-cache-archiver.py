@@ -1,15 +1,18 @@
+#!/usr/bin/python3
+# Bing Cache Archiver
+# Written by Antonizoon for the Bibliotheca Anonoma
+
+# pip3 install robobrowser docopts
 from robobrowser import RoboBrowser
 import re
 import json
 import time
+import docopt
 
-# store input variable as JSON
-def store_json(obj):
-	# filename of JSON file to store to
-	fname = "cache.json"
-
+# store input variable as JSON file
+def store_json(obj, path):
 	# write to JSON, pretty printed
-	with open(fname, 'w') as outfile:
+	with open(path, 'w') as outfile:
 		json.dump(obj, outfile, sort_keys=True, indent=2, separators=(',', ': '))
 
 # scrape bing's HTML search results
@@ -60,16 +63,37 @@ def scrape_cache(query, total):
 	# listings is given as an output object
 	return(listings)
 
+# writes the JSON data to a text file for wget to grab
+def extract_cache_urls(listings, path):
+	# write the cache URLs to a text file
+	with open(path, 'w') as url_file:
+		for listing in listings:
+			if (listing['cache_url'] != None):
+				url_file.write(listing['cache_url'] + '\n')
+
 def main():
-	site = "rockenflac.blogspot.com"			# site to search for
+    # parameters
+	site = "dromble.com"			# site to search for
 	query = "site%3A" + site		# what to search for
-	total = 419						# the total amount of listings for this search on Bing 
+	total = 47						# the total amount of listings for this search on Bing 
+	
+	# Filenames
+	json_fname = 'listings.json'
+	cache_fname = 'cache-urls.txt'
 	
 	# scrape the search results
 	listings = scrape_cache(query, total)
 	
 	# store the listings to JSON
-	store_json(listings)
+	store_json(listings, json_fname)
+	
+	# write cache urls only to text file for easy scrape with wget
+	with open(json_fname) as json_file:
+		listings = json.load(json_file)
+		extract_cache_urls(listings, cache_fname)
+
+	print("Done. Now use the following wget command to archive the cached pages:")
+	print("wget -p -k -i cache-urls.txt -e robots=off")
 
 if __name__ == "__main__":
-	main()
+    main()

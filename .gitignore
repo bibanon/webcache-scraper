@@ -1,2 +1,5 @@
 cache.json
 cache-urls.txt
+bing/
+pypy-env/
+google/
